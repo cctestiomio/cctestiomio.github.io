@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TikTok Pixel TTQ Test (All Events)</title>
+  <title>TikTok Pixel TTQ Test (Exact Event Names)</title>
 
   <!-- TikTok Pixel Base Code -->
   <script>
@@ -19,27 +19,12 @@
         t[e] = function () { t.push([e].concat([].slice.call(arguments, 0))) };
       };
       for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]);
-      ttq.instance = function (t) {
-        for (var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++) ttq.setAndDefer(e, ttq.methods[n]);
-        return e;
-      };
-      ttq.load = function (e, n) {
-        var r = "https://analytics.tiktok.com/i18n/pixel/events.js";
-        ttq._i = ttq._i || {};
-        ttq._i[e] = [];
-        ttq._i[e]._u = r;
-        ttq._t = ttq._t || {};
-        ttq._t[e] = +new Date;
-        ttq._o = ttq._o || {};
-        ttq._o[e] = n || {};
+      ttq.load = function (e) {
         var s = d.createElement("script");
-        s.type = "text/javascript";
         s.async = true;
-        s.src = r + "?sdkid=" + e + "&lib=" + t;
-        var x = d.getElementsByTagName("script")[0];
-        x.parentNode.insertBefore(s, x);
+        s.src = "https://analytics.tiktok.com/i18n/pixel/events.js?sdkid=" + e + "&lib=" + t;
+        d.head.appendChild(s);
       };
-
       ttq.load("CJDTCMJC77U3D7R7E0R0");
       ttq.page();
     }(window, document, "ttq");
@@ -47,23 +32,21 @@
 </head>
 
 <body style="font-family: system-ui, sans-serif; padding: 24px;">
-  <h1>TikTok Pixel – Full Event Test</h1>
+  <h1>TikTok Pixel – Event Name Accuracy Test</h1>
   <p>All events fire with <strong>event_id = 123456</strong></p>
 
   <h3>Standard TikTok Events</h3>
   <div id="standardButtons" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;"></div>
 
-  <h3>Custom Events (raw names)</h3>
-  <div id="customButtonsRaw" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;"></div>
-
-  <h3>Custom Events (friendly labels)</h3>
-  <div id="customButtonsFriendly" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;"></div>
+  <h3>Custom Events</h3>
+  <div id="customButtons" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;"></div>
 
   <pre id="log" style="background:#111; color:#0f0; padding:12px; border-radius:8px; white-space:pre-wrap;"></pre>
 
   <script>
     const EVENT_ID = "123456";
 
+    // Official TikTok standard event names (case-sensitive)
     const standardEvents = [
       "ViewContent",
       "AddToCart",
@@ -78,7 +61,11 @@
       "SubmitForm"
     ];
 
-    const customEvents = Array.from({ length: 10 }, (_, i) => `testcustom${i + 1}`);
+    // Custom events with exact casing
+    const customEvents = Array.from(
+      { length: 10 },
+      (_, i) => `Test Custom ${i + 1}`
+    );
 
     function log(msg) {
       const el = document.getElementById("log");
@@ -86,7 +73,7 @@
       console.log(msg);
     }
 
-    function basePayload() {
+    function payload() {
       return {
         event_id: EVENT_ID,
         contents: [{
@@ -106,35 +93,27 @@
         log("ttq not ready yet");
         return;
       }
-      const payload = basePayload();
-      ttq.track(eventName, payload);
-      log(`Sent ttq.track("${eventName}", ${JSON.stringify(payload)})`);
+      ttq.track(eventName, payload());
+      log(`Sent ttq.track("${eventName}", ${JSON.stringify(payload())})`);
     }
 
-    function createButton(label, eventName = label) {
+    function createButton(eventName) {
       const btn = document.createElement("button");
-      btn.textContent = label;
+      btn.textContent = eventName;
       btn.style.padding = "10px 14px";
       btn.onclick = () => fireEvent(eventName);
       return btn;
     }
 
     const standardContainer = document.getElementById("standardButtons");
-    const customRawContainer = document.getElementById("customButtonsRaw");
-    const customFriendlyContainer = document.getElementById("customButtonsFriendly");
+    const customContainer = document.getElementById("customButtons");
 
     standardEvents.forEach(evt =>
       standardContainer.appendChild(createButton(evt))
     );
 
     customEvents.forEach(evt =>
-      customRawContainer.appendChild(createButton(evt))
-    );
-
-    customEvents.forEach((evt, i) =>
-      customFriendlyContainer.appendChild(
-        createButton(`Test Custom ${i + 1}`, evt)
-      )
+      customContainer.appendChild(createButton(evt))
     );
   </script>
 </body>
