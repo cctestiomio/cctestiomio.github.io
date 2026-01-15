@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TikTok Pixel TTQ Test (Exact Event Names)</title>
+  <title>TikTok Pixel Event Case Test</title>
 
   <!-- TikTok Pixel Base Code -->
   <script>
@@ -16,13 +16,21 @@
         "revokeConsent","grantConsent"
       ];
       ttq.setAndDefer = function (t, e) {
-        t[e] = function () { t.push([e].concat([].slice.call(arguments, 0))) };
+        t[e] = function () {
+          t.push([e].concat([].slice.call(arguments, 0)));
+        };
       };
-      for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]);
+      for (var i = 0; i < ttq.methods.length; i++) {
+        ttq.setAndDefer(ttq, ttq.methods[i]);
+      }
       ttq.load = function (e) {
         var s = d.createElement("script");
         s.async = true;
-        s.src = "https://analytics.tiktok.com/i18n/pixel/events.js?sdkid=" + e + "&lib=" + t;
+        s.src =
+          "https://analytics.tiktok.com/i18n/pixel/events.js?sdkid=" +
+          e +
+          "&lib=" +
+          t;
         d.head.appendChild(s);
       };
       ttq.load("CJDTCMJC77U3D7R7E0R0");
@@ -32,46 +40,39 @@
 </head>
 
 <body style="font-family: system-ui, sans-serif; padding: 24px;">
-  <h1>TikTok Pixel – Event Name Accuracy Test</h1>
-  <p>All events fire with <strong>event_id = 123456</strong></p>
+  <h1>TikTok Pixel – Custom Event Case Sensitivity Test</h1>
 
   <h3>Standard TikTok Events</h3>
-  <div id="standardButtons" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;"></div>
+  <div id="standardButtons" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;"></div>
 
-  <h3>Custom Events</h3>
-  <div id="customButtons" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;"></div>
+  <h3>Custom Events (Exact Case)</h3>
+  <div id="customExactButtons" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;"></div>
+
+  <h3>Custom Events (Lowercase / SDK Style)</h3>
+  <div id="customLowerButtons" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;"></div>
 
   <pre id="log" style="background:#111; color:#0f0; padding:12px; border-radius:8px; white-space:pre-wrap;"></pre>
 
   <script>
     const EVENT_ID = "123456";
 
-    // Official TikTok standard event names (case-sensitive)
     const standardEvents = [
       "ViewContent",
       "AddToCart",
-      "AddToWishlist",
       "InitiateCheckout",
-      "AddPaymentInfo",
       "Purchase",
-      "CompletePayment",
-      "Search",
-      "Subscribe",
-      "Contact",
-      "SubmitForm"
+      "Contact"
     ];
 
-    // Custom events with exact casing
-    const customEvents = Array.from(
+    const customExactEvents = Array.from(
       { length: 10 },
       (_, i) => `Test Custom ${i + 1}`
     );
 
-    function log(msg) {
-      const el = document.getElementById("log");
-      el.textContent += msg + "\n";
-      console.log(msg);
-    }
+    const customLowerEvents = Array.from(
+      { length: 10 },
+      (_, i) => `testcustom${i + 1}`
+    );
 
     function payload() {
       return {
@@ -88,32 +89,43 @@
       };
     }
 
+    function log(msg) {
+      const el = document.getElementById("log");
+      el.textContent += msg + "\n";
+      console.log(msg);
+    }
+
     function fireEvent(eventName) {
-      if (!window.ttq || typeof window.ttq.track !== "function") {
-        log("ttq not ready yet");
+      if (!window.ttq || typeof ttq.track !== "function") {
+        log("ttq not ready");
         return;
       }
       ttq.track(eventName, payload());
-      log(`Sent ttq.track("${eventName}", ${JSON.stringify(payload())})`);
+      log(`Sent: ttq.track("${eventName}", ${JSON.stringify(payload())})`);
     }
 
     function createButton(eventName) {
       const btn = document.createElement("button");
       btn.textContent = eventName;
       btn.style.padding = "10px 14px";
+      btn.style.cursor = "pointer";
       btn.onclick = () => fireEvent(eventName);
       return btn;
     }
 
-    const standardContainer = document.getElementById("standardButtons");
-    const customContainer = document.getElementById("customButtons");
-
-    standardEvents.forEach(evt =>
-      standardContainer.appendChild(createButton(evt))
+    standardEvents.forEach(e =>
+      document.getElementById("standardButtons")
+        .appendChild(createButton(e))
     );
 
-    customEvents.forEach(evt =>
-      customContainer.appendChild(createButton(evt))
+    customExactEvents.forEach(e =>
+      document.getElementById("customExactButtons")
+        .appendChild(createButton(e))
+    );
+
+    customLowerEvents.forEach(e =>
+      document.getElementById("customLowerButtons")
+        .appendChild(createButton(e))
     );
   </script>
 </body>
