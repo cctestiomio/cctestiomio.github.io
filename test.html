@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TikTok Pixel TTQ Test (event_id)</title>
+  <title>TikTok Pixel TTQ Test (All Events)</title>
 
   <!-- TikTok Pixel Base Code -->
   <script>
@@ -40,26 +40,38 @@
         x.parentNode.insertBefore(s, x);
       };
 
-      ttq.load('CJDTCMJC77U3D7R7E0R0');
+      ttq.load("CJDTCMJC77U3D7R7E0R0");
       ttq.page();
-    }(window, document, 'ttq');
+    }(window, document, "ttq");
   </script>
 </head>
 
-<body style="font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 24px;">
-  <h1>TikTok Pixel (ttq) Test Page</h1>
-  <p>Click buttons to fire events (all with event_id = 123456).</p>
+<body style="font-family: system-ui, sans-serif; padding: 24px;">
+  <h1>TikTok Pixel – Full Event Test</h1>
+  <p>All events fire with <strong>event_id = 123456</strong></p>
 
-  <div style="display:flex; gap:12px; flex-wrap:wrap; margin:16px 0;">
-    <button id="btnViewContent" style="padding:10px 14px;">Fire ViewContent</button>
-    <button id="btnAddToCart" style="padding:10px 14px;">Fire AddToCart</button>
-    <button id="btnPurchase" style="padding:10px 14px;">Fire Purchase</button>
-  </div>
+  <div id="buttons" style="display:flex; gap:10px; flex-wrap:wrap; margin:16px 0;"></div>
 
   <pre id="log" style="background:#111; color:#0f0; padding:12px; border-radius:8px; white-space:pre-wrap;"></pre>
 
   <script>
     const EVENT_ID = "123456";
+
+    const standardEvents = [
+      "ViewContent",
+      "AddToCart",
+      "AddToWishlist",
+      "InitiateCheckout",
+      "AddPaymentInfo",
+      "Purchase",
+      "CompletePayment",
+      "Search",
+      "Subscribe",
+      "Contact",
+      "SubmitForm"
+    ];
+
+    const customEvents = Array.from({ length: 10 }, (_, i) => `testcustom${i + 1}`);
 
     function log(msg) {
       const el = document.getElementById("log");
@@ -67,16 +79,7 @@
       console.log(msg);
     }
 
-    function safeTrack(eventName, payload) {
-      if (!window.ttq || typeof window.ttq.track !== "function") {
-        log("ttq not ready yet. Try again in a second.");
-        return;
-      }
-      window.ttq.track(eventName, payload);
-      log("Sent ttq.track('" + eventName + "', " + JSON.stringify(payload) + ")");
-    }
-
-    function productPayload() {
+    function basePayload() {
       return {
         event_id: EVENT_ID,
         contents: [{
@@ -86,22 +89,39 @@
           price: 8
         }],
         content_type: "product",
-        value: 8.0,
+        value: 8,
         currency: "USD"
       };
     }
 
-    document.getElementById("btnViewContent").addEventListener("click", function () {
-      safeTrack("ViewContent", productPayload());
-    });
+    function fireEvent(eventName) {
+      if (!window.ttq || typeof window.ttq.track !== "function") {
+        log("ttq not ready yet");
+        return;
+      }
+      const payload = basePayload();
+      ttq.track(eventName, payload);
+      log(`Sent ttq.track("${eventName}", ${JSON.stringify(payload)})`);
+    }
 
-    document.getElementById("btnAddToCart").addEventListener("click", function () {
-      safeTrack("AddToCart", productPayload());
-    });
+    function createButton(label) {
+      const btn = document.createElement("button");
+      btn.textContent = label;
+      btn.style.padding = "10px 14px";
+      btn.onclick = () => fireEvent(label);
+      return btn;
+    }
 
-    document.getElementById("btnPurchase").addEventListener("click", function () {
-      safeTrack("Purchase", productPayload());
-    });
+    const container = document.getElementById("buttons");
+
+    standardEvents.forEach(evt => container.appendChild(createButton(evt)));
+
+    const divider = document.createElement("div");
+    divider.style.flexBasis = "100%";
+    divider.style.margin = "8px 0";
+    container.appendChild(divider);
+
+    customEvents.forEach(evt => container.appendChild(createButton(evt)));
   </script>
 </body>
 </html>
