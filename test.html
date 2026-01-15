@@ -50,7 +50,14 @@
   <h1>TikTok Pixel – Full Event Test</h1>
   <p>All events fire with <strong>event_id = 123456</strong></p>
 
-  <div id="buttons" style="display:flex; gap:10px; flex-wrap:wrap; margin:16px 0;"></div>
+  <h3>Standard TikTok Events</h3>
+  <div id="standardButtons" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;"></div>
+
+  <h3>Custom Events (raw names)</h3>
+  <div id="customButtonsRaw" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;"></div>
+
+  <h3>Custom Events (friendly labels)</h3>
+  <div id="customButtonsFriendly" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;"></div>
 
   <pre id="log" style="background:#111; color:#0f0; padding:12px; border-radius:8px; white-space:pre-wrap;"></pre>
 
@@ -104,24 +111,31 @@
       log(`Sent ttq.track("${eventName}", ${JSON.stringify(payload)})`);
     }
 
-    function createButton(label) {
+    function createButton(label, eventName = label) {
       const btn = document.createElement("button");
       btn.textContent = label;
       btn.style.padding = "10px 14px";
-      btn.onclick = () => fireEvent(label);
+      btn.onclick = () => fireEvent(eventName);
       return btn;
     }
 
-    const container = document.getElementById("buttons");
+    const standardContainer = document.getElementById("standardButtons");
+    const customRawContainer = document.getElementById("customButtonsRaw");
+    const customFriendlyContainer = document.getElementById("customButtonsFriendly");
 
-    standardEvents.forEach(evt => container.appendChild(createButton(evt)));
+    standardEvents.forEach(evt =>
+      standardContainer.appendChild(createButton(evt))
+    );
 
-    const divider = document.createElement("div");
-    divider.style.flexBasis = "100%";
-    divider.style.margin = "8px 0";
-    container.appendChild(divider);
+    customEvents.forEach(evt =>
+      customRawContainer.appendChild(createButton(evt))
+    );
 
-    customEvents.forEach(evt => container.appendChild(createButton(evt)));
+    customEvents.forEach((evt, i) =>
+      customFriendlyContainer.appendChild(
+        createButton(`Test Custom ${i + 1}`, evt)
+      )
+    );
   </script>
 </body>
 </html>
